@@ -231,13 +231,20 @@ class Main {
     this.scene = new THREE.Scene();
     this.camera = null;
 
+    this.group = new THREE.Group();
+    this.scene.add(this.group);
+
+    this.partcle = new Particle(this.group);
+    this.partcle.init();
+
+    this.cursor = {
+      x: 0,
+      y: 0
+    };
+
     this._init();
     this._update();
     this._addEvent();
-
-    this.partcle = new Particle(this.scene);
-    this.partcle.init();
-
   }
 
   _setCamera() {
@@ -262,6 +269,13 @@ class Main {
 
   _update() {
 
+    const parallaxX = this.cursor.x;
+    const parallaxY = - this.cursor.y;
+
+    this.group.rotation.x += ((parallaxY * 0.4) - this.group.rotation.x) * 0.1;
+    this.group.rotation.y += ((parallaxX * 0.4) - this.group.rotation.y) * 0.1;
+
+
     //レンダリング
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this._update.bind(this));
@@ -279,8 +293,14 @@ class Main {
     this.camera.updateProjectionMatrix();
   }
 
+  _onMousemove(e) {
+    this.cursor.x = e.clientX / this.viewport.width - 0.5;
+    this.cursor.y = e.clientY / this.viewport.height - 0.5;
+  }
+
   _addEvent() {
     window.addEventListener("resize", this._onResize.bind(this));
+    window.addEventListener("mousemove", this._onMousemove.bind(this));
   }
 }
 
